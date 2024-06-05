@@ -9,7 +9,7 @@ class Atmega328TemplateRecipe(ConanFile):
     # Optional metadata
     license = "MIT"
     author = "David A. Haufe"
-    #url = "http://somesite.com"
+    url = "https://github.com/Zombieanfuehrer/atmega328p-cxx-template"
     description = "Just a simple conan + cmake project to support the atmega328p"
     topics = ("avr")
 
@@ -19,19 +19,19 @@ class Atmega328TemplateRecipe(ConanFile):
     default_options = {"shared": False, "fPIC": False, "platform": "avr"}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt", "*.cmake", "app/*", "somelib/*", "core/*"
+    exports_sources = "CMakeLists.txt", "*.cmake", "app/*", "src/*"
     generators = "CMakeDeps"
 
     def requirements(self):
         if (self.options.platform == 'linux'):
-            self.requires("catch2/3.1.0")
+            self.requires("gtest/1.14.0")
 
     def layout(self):
         cmake_layout(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.presets_prefix = "conan-" + str(self.options.platform)
+        tc.presets_prefix = "conan-generated" + str(self.options.platform)
         tc.generate()
 
     def build(self):
