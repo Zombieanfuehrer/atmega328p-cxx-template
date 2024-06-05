@@ -3,16 +3,16 @@ function(run_conan_install)
     set(oneValueArgs CONANFILE_PY_PATH CONAN_PROFILE CONAN_GENERATORS_PATH)
     cmake_parse_arguments(
         RUN_CONAN_INSTALL
-        "${options}"
+        ""
         "${oneValueArgs}"
-        "${multiValueArgs}"
+        ""
         ${ARGN})
 
         execute_process(
             COMMAND conan install ${RUN_CONAN_INSTALL_CONANFILE_PY_PATH} --build=missing -pr:h=${RUN_CONAN_INSTALL_CONAN_PROFILE}
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             OUTPUT_VARIABLE CONAN_INSTALL_STDOUT
-            ERROR_VARIABLE CONAN_INSTALL_STDERR
+            ERROR_VARIABLE CONAN_INSTALL_STDERR     # conan writes output in stderr instead stdout
             RESULT_VARIABLE CONAN_INSTALL_RESULT
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
@@ -32,6 +32,7 @@ function(run_conan_install)
         else()
             message(WARNING "Could not find 'Generators folder:' line in Conan output.")
         endif()
+        message(STATUS "DEBUG_0: ${RUN_CONAN_INSTALL_CONAN_GENERATORS_PATH}")
 endfunction(run_conan_install)
 
 function(set_env_through_conanbuild_script)
@@ -42,12 +43,12 @@ function(set_env_through_conanbuild_script)
         "${oneValueArgs}"
         "${multiValueArgs}"
         ${ARGN})
-
-        set(CONANBUILD_SH "${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH}/conanbuild.sh")
-        if(EXISTS ${CONANBUILD_SH})
+        message(STATUS "DEBUG_2: ${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH}")
+        string(APPEND ${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH} "/conanbuild.sh")
+        if(EXISTS ${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH})
         message(STATUS "Build enviroment will set by ${CONANBUILD_SH}") 
         execute_process(
-            COMMAND source ${CONANBUILD_SH}
+            COMMAND source ${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH}
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         )
         else() 

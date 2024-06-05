@@ -32,7 +32,6 @@ add_subdirectory(app)
 
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/CMakeUserPresets.json")
     include(ConanInstall)
-
     set(CONAN_GENERATORS_FOLDER_PATH)
     run_conan_install(
         CONANFILE_PY_PATH
@@ -40,6 +39,12 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/CMakeUserPresets.json")
         CONAN_PROFILE
         ${CONAN_PROFILE_NAME}
         CONAN_GENERATORS_PATH  
+        CONAN_GENERATORS_FOLDER_PATH
+    )
+    message(STATUS "DEBUG_1: ${CONAN_GENERATORS_FOLDER_PATH}")
+    set_env_through_conanbuild_script(
+        CONAN_GENERATORS_PATH
         ${CONAN_GENERATORS_FOLDER_PATH}
     )
+
 endif()
