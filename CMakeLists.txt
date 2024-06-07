@@ -6,7 +6,7 @@ project(
     LANGUAGES CXX)
 
 # SET USER SPECIFIC VARIABLES 
-set(CONAN_PROFILE_NAME "avr-mega328p" CACHE STRING "Name of the conan profile to use")
+set(CONAN_PROFILE_NAME "avr-mega328p_g" CACHE STRING "Name of the conan profile to use")
 
 # GLOBAL VARIABLES
 set(CMAKE_CXX_STANDARD 17)

@@ -18,6 +18,7 @@ function(run_conan_install)
         )
 
         if(CONAN_INSTALL_RESULT)
+            message(STATUS "[run_conan_install] Conan error is '${CONAN_INSTALL_STDERR}'")
             message(FATAL_ERROR "[run_conan_install] Conan install failed with profile ${RUN_CONAN_INSTALL_CONAN_PROFILE}!")
             return()
         else()

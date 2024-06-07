@@ -23,6 +23,7 @@ class Atmega328TemplateRecipe(ConanFile):
     generators = "CMakeDeps"
 
     def requirements(self):
+        self.build_requires("cmake/[>=3.28.0]")
         if (self.options.platform == 'linux'):
             self.requires("gtest/1.14.0")
 
@@ -36,7 +37,11 @@ class Atmega328TemplateRecipe(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        build_type = str(self.settings.build_type)
+        arch = str(self.settings.arch)
+        os = str(self.settings.os)
+        build_folder_name = f"build/{build_type}-{arch}-{os}"
+        cmake.configure(build_folder=build_folder_name)
         cmake.build(target="ATmega328__T_LIB")
         cmake.build(target="ATmega328__T_")
 
