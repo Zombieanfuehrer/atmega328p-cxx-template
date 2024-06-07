@@ -1,4 +1,4 @@
-# Function to create a custom target for running the Conan install command
+include(Utils)
 function(run_conan_install)
     set(oneValueArgs CONANFILE_PY_PATH CONAN_PROFILE CONAN_GENERATORS_PATH)
     cmake_parse_arguments(
@@ -26,26 +26,28 @@ function(run_conan_install)
 
         string(REGEX MATCH "Generators folder: .*$" CONAN_GENERATORS_FOLDER_LINE "${CONAN_INSTALL_STDERR}")
         if(CONAN_GENERATORS_FOLDER_LINE)
-            string(REGEX REPLACE "Generators folder: " "" CONAN_GENERATORS_FOLDER_PATH "${CONAN_GENERATORS_FOLDER_LINE}")
+            string(REGEX REPLACE "Generators folder: ([^\r\n]*).*$" "\\1" CONAN_GENERATORS_FOLDER_PATH "${CONAN_GENERATORS_FOLDER_LINE}")
+            string(REGEX REPLACE "[^A-Za-z0-9_./\:-]+$" "" CONAN_GENERATORS_FOLDER_PATH "${CONAN_GENERATORS_FOLDER_PATH}")
             message(STATUS "Extracted generators folder path: ${CONAN_GENERATORS_FOLDER_PATH}")
             set(${RUN_CONAN_INSTALL_CONAN_GENERATORS_PATH} "${CONAN_GENERATORS_FOLDER_PATH}" PARENT_SCOPE)
         else()
             message(WARNING "Could not find 'Generators folder:' line in Conan output.")
         endif()
-        message(STATUS "DEBUG_0: ${RUN_CONAN_INSTALL_CONAN_GENERATORS_PATH}")
 endfunction(run_conan_install)
 
 function(set_env_through_conanbuild_script)
     set(oneValueArgs CONAN_GENERATORS_PATH)
     cmake_parse_arguments(
         SET_ENV_THROUGH_CONANBUILD_SCRIPT
-        "${options}"
+        ""
         "${oneValueArgs}"
-        "${multiValueArgs}"
+        ""
         ${ARGN})
         message(STATUS "DEBUG_2: ${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH}")
-        string(APPEND ${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH} "/conanbuild.sh")
-        if(EXISTS ${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH})
+        string(REGEX REPLACE "[^[:print:]]+$" "" CLEANED_STRING "${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH}")
+        set(CONANBUILD_ENV_SCRIPT "${CLEANED_STRING}/conanbuild.sh")
+        message(STATUS "DEBUG_3: ${CONANBUILD_ENV_SCRIPT}")
+        if(EXISTS "${CONANBUILD_ENV_SCRIPT}")
         message(STATUS "Build enviroment will set by ${CONANBUILD_SH}") 
         execute_process(
             COMMAND source ${SET_ENV_THROUGH_CONANBUILD_SCRIPT_CONAN_GENERATORS_PATH}
