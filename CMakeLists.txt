@@ -41,7 +41,6 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/CMakeUserPresets.json")
         CONAN_GENERATORS_PATH  
         CONAN_GENERATORS_FOLDER_PATH
     )
-    message(STATUS "DEBUG_1: ${CONAN_GENERATORS_FOLDER_PATH}")
     set_env_through_conanbuild_script(
         CONAN_GENERATORS_PATH
         ${CONAN_GENERATORS_FOLDER_PATH}
