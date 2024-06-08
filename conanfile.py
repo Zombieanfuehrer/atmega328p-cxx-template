@@ -32,7 +32,7 @@ class Atmega328TemplateRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.presets_prefix = "conan-generated" + str(self.options.platform)
+        tc.presets_prefix = "conan-generated-" + str(self.options.platform)
         tc.generate()
 
     def build(self):
