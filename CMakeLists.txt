@@ -33,40 +33,23 @@ add_subdirectory(app)
 include(ConanInstall)
 set(CMAKE_USER_PRESET "${PROJECT_SOURCE_DIR}/CMakeUserPresets.json")
 
-prepare_build_by_conan(
+prepare_build_presets_by_conan(
     PACKAGE_CONANFILE_PY_PATH
     "${PROJECT_SOURCE_DIR}/conanfile.py"
     CONAN_BUILD_PROFILE
     ${CONAN_PROFILE_NAME}
     CMAKE_USER_PRESET_PATH
     ${CMAKE_USER_PRESET}
+    CONAN_BUILDED_CMAKE_PRESET_NAME
 )
+message(STATUS "[CMakeLists.txt CONAN_BUILDED_CMAKE_PRESET_NAME]: ${CONAN_BUILDED_CMAKE_PRESET_NAME}")
 
-if(NOT EXISTS ${CMAKE_USER_PRESET})
-    set(CONAN_GENERATORS_FOLDER_PATH)
-    run_conan_install(
-        CONANFILE_PY_PATH
-        "${PROJECT_SOURCE_DIR}/conanfile.py"
-        CONAN_PROFILE
-        ${CONAN_PROFILE_NAME}
-        CONAN_GENERATORS_PATH  
-        CONAN_GENERATORS_FOLDER_PATH
+# Laden der CMake-Preset, falls sie gefunden wurde
+if(CONAN_BUILDED_CMAKE_PRESET_NAME)
+    load_conan_generator_preset(
+        CMAKE_BUILD_PRESET_NAME
+        ${CONAN_BUILDED_CMAKE_PRESET_NAME}
     )
-    set_env_through_conanbuild_script(
-        CONAN_GENERATORS_PATH
-        ${CONAN_GENERATORS_FOLDER_PATH}
-    )
+else()
+    message(FATAL_ERROR "No valid CMake preset found!")
 endif()
-
-set(CONAN_BUILD_PRESET)
-find_conan_generator_preset(
-    CMAKE_USER_PRESET_JSON_FILE_PATH 
-    ${CMAKE_USER_PRESET}
-    CONAN_GENERATED_CMAKE_BUILD_PRESET_NAME
-    CONAN_BUILD_PRESET
-)
-
-load_conan_generator_preset(
-    CMAKE_BUILD_PRESET_NAME
-    ${CONAN_BUILD_PRESET}
-)
