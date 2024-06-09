@@ -83,7 +83,7 @@ function(find_conan_generator_preset)
     endif()
 endfunction(find_conan_generator_preset)
 
-function(load_conan_generator_preset)
+function(create_target_load_cmake_preset)
     set(oneValueArgs CMAKE_BUILD_PRESET_NAME )
     cmake_parse_arguments(
         LOAD_CONAN_GENERATOR_PRESET
@@ -92,17 +92,20 @@ function(load_conan_generator_preset)
         ""
         ${ARGN})
 
-        message(STATUS "[load_conan_generator_preset] Load CMake Preset : ${LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME}")
-        execute_process(
-            COMMAND cmake --preset ${LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME}
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-            RESULT_VARIABLE CONAN_LOAD_PRESET_RESULT
+        message(STATUS "[create_target_load_cmake_preset] LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME : ${LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME}")
+        add_custom_target(
+            load_preset_${LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME}
+            COMMENT "Setting CMake Preset: ${LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME}"
         )
 
-        if(NOT CONAN_LOAD_PRESET_RESULT EQUAL "0")
-            message(FATAL_ERROR "[load_conan_generator_preset] Failed to laod CMake preset: ${LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME}!")
-        endif()
-endfunction(load_conan_generator_preset)
+        add_custom_command(
+            TARGET load_preset_${LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME}
+            COMMAND ${CMAKE_COMMAND} --preset ${LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            COMMENT "Set Preset: ${LOAD_CONAN_GENERATOR_PRESET_CMAKE_BUILD_PRESET_NAME}"
+            VERBATIM
+        )        
+endfunction(create_target_load_cmake_preset)
 
 function(prepare_build_presets_by_conan)
     set(oneValueArgs PACKAGE_CONANFILE_PY_PATH CONAN_BUILD_PROFILE CMAKE_USER_PRESET_PATH CONAN_BUILD_PRESET)
@@ -112,7 +115,7 @@ function(prepare_build_presets_by_conan)
         "${oneValueArgs}"
         ""
         ${ARGN})
- 
+
     if(NOT EXISTS ${PREPARE_BUILD_BY_CONAN_CMAKE_USER_PRESET_PATH})
         set(CONAN_GENERATORS_FOLDER_PATH)
         run_conan_install(
@@ -135,9 +138,6 @@ function(prepare_build_presets_by_conan)
         CONAN_GENERATED_CMAKE_BUILD_PRESET_NAME
         CONAN_BUILDED_CMAKE_PRESET
     )
-
-    # Verwenden Sie PARENT_SCOPE, um die Variable im übergeordneten Scope zu setzen
     set(${PREPARE_BUILD_BY_CONAN_CONAN_BUILD_PRESET} "${CONAN_BUILDED_CMAKE_PRESET}" PARENT_SCOPE)
-    message(STATUS "[PREPARE_BUILD_BY_CONAN_CONAN_BUILD_PRESET] Found CMake Preset : ${PREPARE_BUILD_BY_CONAN_CONAN_BUILD_PRESET}")
-
 endfunction(prepare_build_presets_by_conan)
+

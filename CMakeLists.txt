@@ -40,15 +40,15 @@ prepare_build_presets_by_conan(
     ${CONAN_PROFILE_NAME}
     CMAKE_USER_PRESET_PATH
     ${CMAKE_USER_PRESET}
-    CONAN_BUILDED_CMAKE_PRESET_NAME
+    CONAN_BUILD_PRESET
+    CONAN_GENERATED_CMAKE_PRESET
 )
-message(STATUS "[CMakeLists.txt CONAN_BUILDED_CMAKE_PRESET_NAME]: ${CONAN_BUILDED_CMAKE_PRESET_NAME}")
+message(STATUS "[CMakeLists.txt CONAN_GENERATED_CMAKE_PRESET]: ${CONAN_GENERATED_CMAKE_PRESET}")
 
-# Laden der CMake-Preset, falls sie gefunden wurde
-if(CONAN_BUILDED_CMAKE_PRESET_NAME)
-    load_conan_generator_preset(
+if(CONAN_GENERATED_CMAKE_PRESET)
+    create_target_load_cmake_preset(
         CMAKE_BUILD_PRESET_NAME
-        ${CONAN_BUILDED_CMAKE_PRESET_NAME}
+        ${CONAN_GENERATED_CMAKE_PRESET}
     )
 else()
     message(FATAL_ERROR "No valid CMake preset found!")
