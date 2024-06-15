@@ -10,7 +10,7 @@ function(set_python_virtual_enviroment)
         message(STATUS "[set_python_virtual_enviroment] setup virtual python enviroment for this project") 
 
         execute_process(
-            COMMAND ${Python_EXECUTABLE} -m venv .venv
+            COMMAND ${Python3_EXECUTABLE} -m venv .venv
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         )
     endif()
@@ -28,8 +28,14 @@ function(set_python_virtual_enviroment)
         unset (Python3_EXECUTABLE)
         find_package (Python3 COMPONENTS Interpreter REQUIRED)
 
+        if (Python3_FOUND)
+            message(STATUS "[set_python_virtual_enviroment] Python 3 from .venv -> Version: ${Python3_VERSION}")
+        else()
+            message(FATAL_ERROR "[set_python_virtual_enviroment] Python 3 from .venv not found!")
+        endif()
+
         execute_process(
-            COMMAND ${Python_EXECUTABLE} -m pip install -r requirements.txt
+            COMMAND pip install -r ./requirements.txt
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             OUTPUT_VARIABLE PIP_INSTALL_STDOUT
             ERROR_VARIABLE PIP_INSTALL_STDERR
@@ -39,6 +45,7 @@ function(set_python_virtual_enviroment)
 
         if(PIP_INSTALL_RESULT)
             message(STATUS "[set_python_virtual_enviroment] pip install error is '${PIP_INSTALL_STDOUT}'")
+            message(STATUS "[set_python_virtual_enviroment] pip install error1 is '${PIP_INSTALL_STDERR}'")
         else()
             message(STATUS "[set_python_virtual_enviroment] pip install succeeded: '${PIP_INSTALL_STDOUT}'")
         endif()
