@@ -5,6 +5,8 @@ project(
     VERSION 1.0.0
     LANGUAGES CXX)
 
+
+
 # SET USER SPECIFIC VARIABLES 
 set(CONAN_PROFILE_NAME "avr-mega328p_g" CACHE STRING "Name of the conan profile to use")
 set(F_CPU "16000000")
@@ -19,6 +21,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # OPTIONS
 option(ENABLE_WARNINGS "Enable to add warnings to a target." ON)
 option(ENABLE_WARNINGS_AS_ERRORS "Enable to treat warnings as errors." OFF)
+option(ENABLE_CMAKE_FORMAT "Enable to add cmake-format." ON)
+
 
 # PROJECT / LIBRARY NAMES
 set(LIBRARY_NAME "ATmega328__T_LIB")
@@ -29,6 +33,14 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 
 add_subdirectory(src)
 add_subdirectory(app)
+
+include(PythonVEnv)
+set_python_virtual_enviroment()
+
+if(${ENABLE_CMAKE_FORMAT})
+    include(CMakeFormat)
+    add_cmake_format_target()
+endif()
 
 include(ConanInstall)
 set(CMAKE_USER_PRESET "${PROJECT_SOURCE_DIR}/CMakeUserPresets.json")
@@ -43,7 +55,6 @@ prepare_build_presets_by_conan(
     CONAN_BUILD_PRESET
     CONAN_GENERATED_CMAKE_PRESET
 )
-message(STATUS "[CMakeLists.txt CONAN_GENERATED_CMAKE_PRESET]: ${CONAN_GENERATED_CMAKE_PRESET}")
 
 if(CONAN_GENERATED_CMAKE_PRESET)
     create_target_load_cmake_preset(
