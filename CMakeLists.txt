@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.28)
 
-project( 
+project(
     ATmega328__T_
     VERSION 1.0.0
     LANGUAGES CXX)
 
-
-
-# SET USER SPECIFIC VARIABLES 
-set(CONAN_PROFILE_NAME "avr-mega328p_g" CACHE STRING "Name of the conan profile to use")
+# SET USER SPECIFIC VARIABLES
+set(CONAN_PROFILE_NAME
+    "avr-mega328p_g"
+    CACHE STRING "Name of the conan profile to use")
 set(F_CPU "16000000")
 
 # GLOBAL VARIABLES
@@ -17,12 +17,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
 # OPTIONS
 option(ENABLE_WARNINGS "Enable to add warnings to a target." ON)
 option(ENABLE_WARNINGS_AS_ERRORS "Enable to treat warnings as errors." OFF)
 option(ENABLE_CMAKE_FORMAT "Enable to add cmake-format." ON)
-
 
 # PROJECT / LIBRARY NAMES
 set(LIBRARY_NAME "ATmega328__T_LIB")
@@ -53,14 +51,10 @@ prepare_build_presets_by_conan(
     CMAKE_USER_PRESET_PATH
     ${CMAKE_USER_PRESET}
     CONAN_BUILD_PRESET
-    CONAN_GENERATED_CMAKE_PRESET
-)
+    CONAN_GENERATED_CMAKE_PRESET)
 
 if(CONAN_GENERATED_CMAKE_PRESET)
-    create_target_load_cmake_preset(
-        CMAKE_BUILD_PRESET_NAME
-        ${CONAN_GENERATED_CMAKE_PRESET}
-    )
+    create_target_load_cmake_preset(CMAKE_BUILD_PRESET_NAME ${CONAN_GENERATED_CMAKE_PRESET})
 else()
     message(FATAL_ERROR "No valid CMake preset found!")
 endif()
