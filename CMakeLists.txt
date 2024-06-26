@@ -20,6 +20,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # OPTIONS
 option(ENABLE_WARNINGS "Enable to add warnings to a target." ON)
 option(ENABLE_WARNINGS_AS_ERRORS "Enable to treat warnings as errors." OFF)
+option(ENABLE_CPPLINT "Enable to add cpplint, static code analysis" ON)
 option(ENABLE_CMAKE_FORMAT "Enable to add cmake-format." ON)
 
 # PROJECT / LIBRARY NAMES
@@ -34,6 +35,11 @@ add_subdirectory(app)
 
 include(PythonVEnv)
 set_python_virtual_enviroment()
+
+if(${ENABLE_CPPLINT})
+    include(CppLinter)
+    add_cpplint_dependancy()
+endif()
 
 if(${ENABLE_CMAKE_FORMAT})
     include(CMakeFormat)

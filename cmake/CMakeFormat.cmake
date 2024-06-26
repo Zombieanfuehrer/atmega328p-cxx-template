@@ -16,7 +16,7 @@ function(add_cmake_format_target)
     # Suchen des cmake-format Programms
     find_program(CMAKE_FORMAT cmake-format)
     if(CMAKE_FORMAT)
-        message(STATUS "Added Cmake Format")
+        message(STATUS "[add_cmake_format_target] Added Cmake Format")
 
         # Erstellen der Liste von Formatierungsbefehlen
         set(FORMATTING_COMMANDS)
@@ -39,6 +39,6 @@ function(add_cmake_format_target)
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Running cmake-format")
     else()
-        message(WARNING "CMAKE_FORMAT NOT FOUND")
+        message(WARNING "[add_cmake_format_target] CMAKE_FORMAT NOT FOUND")
     endif()
 endfunction()
