@@ -1,3 +1,49 @@
+set(CPPLINT_CONFIG
+"verbose"
+"output"
+"filter"
+"counting"
+"repository"
+"root"
+"linelength"
+"recursive"
+"exclude"
+"extensions"
+"headers")
+
+function(get_build_filter)
+    set(oneValueArgs CPPLINT_CFG_JSON_CONTENT FILTER_LIST)
+    cmake_parse_arguments(
+        GET_BUILD_FILTER
+        ""
+        "${oneValueArgs}"
+        ""
+        ${ARGN})
+
+    string(
+        JSON
+        VALUE
+        GET
+        ${GET_BUILD_FILTER_CPPLINT_CFG_JSON_CONTENT}
+        "filter")
+
+    set(CURRENT_FILTER_LIST ${GET_BUILD_FILTER_FILTER_LIST})
+
+    if (NOT "${VALUE}" STREQUAL "")
+        string(FIND "${VALUE}" "\"build\": [" start_index)
+        string(FIND "${VALUE}" "]," end_index)
+
+        math(EXPR content_start "${start_index} +19") # 19 Chars inkl. build\": [ bis zum ersten array eintrag
+        math(EXPR content_length "${end_index} - ${content_start}")
+        string(SUBSTRING "${VALUE}" ${content_start} ${content_length} BUILD_CONTENT)
+        string(REPLACE "\n" "" BUILD_CONTENT "${BUILD_CONTENT}")
+        string(REPLACE " " "" BUILD_CONTENT "${BUILD_CONTENT}")
+        string(REPLACE "\"" "" BUILD_CONTENT "${BUILD_CONTENT}")
+        list(APPEND CURRENT_FILTER_LIST ${BUILD_CONTENT})
+        set(${GET_BUILD_FILTER_FILTER_LIST} "${CURRENT_FILTER_LIST}" PARENT_SCOPE)
+    endif()
+endfunction(get_build_filter)
+
 function(parse_cpplint_config)
     set(oneValueArgs CPPLINT_CONFIG_JSON_PATH)
     cmake_parse_arguments(
@@ -11,16 +57,36 @@ function(parse_cpplint_config)
             STATUS "[parse_cpplint_config] search for cpplint configuration at : ${PARSE_CPPLINT_CONFIG_CPPLINT_CONFIG_JSON_PATH}")
         file(READ "${PARSE_CPPLINT_CONFIG_CPPLINT_CONFIG_JSON_PATH}" CPPLINT_CONFIG_JSON_CONTENT)
     
+        foreach(CPP_CONFIGURATION_OPTION IN LISTS CPPLINT_CONFIG)
+            # Handle filter arrays specially
+            if (CPP_CONFIGURATION_OPTION MATCHES "^filter")
+                get_build_filter(
+                    CPPLINT_CFG_JSON_CONTENT
+                    ${CPPLINT_CONFIG_JSON_CONTENT}
+                    FILTER_LIST
+                    UPDATED_CPPLINT_CONFIG
+                )
+            else()
+            # General case for other configuration options
+            string(
+                JSON
+                VALUE
+                GET
+                ${CPPLINT_CONFIG_JSON_CONTENT}
+                ${CPP_CONFIGURATION_OPTION})
 
-        string(
-        JSON
-        CPPLINT_VERBOSITY
-        GET
-        ${CPPLINT_CONFIG_JSON_CONTENT}
-        "verbose")
-    
-        message(
-            STATUS "[parse_cpplint_config] cpplint verbose : ${CPPLINT_VERBOSITY}")
+            if (NOT "${VALUE}" STREQUAL "")
+                list(APPEND UPDATED_CPPLINT_CONFIG "${CPP_CONFIGURATION_OPTION}=${VALUE}")
+            else()
+                message(STATUS "[parse_cpplint_config] ${CPP_CONFIGURATION_OPTION}: No valid value found!")
+            endif()
+        endif()
+    endforeach()
+
+        
+        foreach(IT IN LISTS UPDATED_CPPLINT_CONFIG)
+            message(STATUS "DEBUG: ${IT}")  
+        endforeach()
 endfunction(parse_cpplint_config)
 
 function(add_cpplint_dependancy)
