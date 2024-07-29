@@ -28,7 +28,7 @@ function(get_linter_filter_array)
         ""
         ${ARGN})
 
-    message(STATUS "[get_linter_filter_array] search for cpplint filter type: ${GET_LINTER_FILTER_ARRAY_ARRAY_TYPENAME} and extract appropriate options")
+    message(STATUS "[get_linter_filter_array] search for cpplint filter type: ${GET_LINTER_FILTER_ARRAY_ARRAY_TYPENAME} and extract appropriate options: \n")
     string(
         JSON
         VALUE
@@ -36,23 +36,14 @@ function(get_linter_filter_array)
         ${GET_LINTER_FILTER_ARRAY_CPPLINT_CFG_JSON_CONTENT}
         "filter")
 
-    set(CURRENT_FILTER_LIST ${GET_LINTER_FILTER_ARRAY_FILTER_LIST})
-
+    set(CURRENT_FILTER_LIST)
     if (NOT "${VALUE}" STREQUAL "")
-        string(FIND "${VALUE}" "\"${GET_LINTER_FILTER_ARRAY_ARRAY_TYPENAME}\": [" start_index)
-        string(FIND "${VALUE}" "]," end_index)
-
-        set(BUILD_ARRAY_OFFSET 19) # 19 Chars inkl. build\": [ bis zum ersten array eintrag
-
-        math(EXPR content_start "${start_index} + ${BUILD_ARRAY_OFFSET}") 
-        math(EXPR content_length "${end_index} - ${content_start}")
-        string(SUBSTRING "${VALUE}" ${content_start} ${content_length} BUILD_CONTENT)
-        string(REPLACE "\n" "" BUILD_CONTENT "${BUILD_CONTENT}")
-        string(REPLACE " " "" BUILD_CONTENT "${BUILD_CONTENT}")
-        string(REPLACE "\"" "" BUILD_CONTENT "${BUILD_CONTENT}")
-        message(STATUS "DEBUG BUILD_CONTENT= ${BUILD_CONTENT}")
-        list(APPEND CURRENT_FILTER_LIST ${BUILD_CONTENT})
+        set(SEARCH_FOR_FILTER_ARRAY_ENTRYS_REGEX "[+-]${GET_LINTER_FILTER_ARRAY_ARRAY_TYPENAME}\/[a-zA-Z0-9_+]+")
+        string(REGEX MATCHALL "${SEARCH_FOR_FILTER_ARRAY_ENTRYS_REGEX}" CPPLINT_CONFIG_FILTER_ENTRIES ${VALUE})
+        list(APPEND CURRENT_FILTER_LIST ${CPPLINT_CONFIG_FILTER_ENTRIES})
         set(${GET_LINTER_FILTER_ARRAY_FILTER_LIST} "${CURRENT_FILTER_LIST}" PARENT_SCOPE)
+    else()
+        message(STATUS "[get_linter_filter_array] no valid 'filter' found in cpplint-config.json file!")
     endif()
 endfunction(get_linter_filter_array)
 
@@ -68,10 +59,12 @@ function(parse_cpplint_config)
     message(STATUS "[parse_cpplint_config] search for cpplint configuration at : ${PARSE_CPPLINT_CONFIG_CPPLINT_CONFIG_JSON_PATH}")
     file(READ "${PARSE_CPPLINT_CONFIG_CPPLINT_CONFIG_JSON_PATH}" CPPLINT_CONFIG_JSON_CONTENT)
     
+    set(UPDATED_CPPLINT_CONFIG)
     foreach(CPP_CONFIGURATION_OPTION IN LISTS CPPLINT_CONFIG)
         # Handle filter arrays specially
         if (CPP_CONFIGURATION_OPTION MATCHES "^filter")
             foreach(CPP_LINTER_FILTER_ARRAY IN LISTS CPPLINT_FILTER_TYPES)
+                set(UPDATED_CPPLINT_CONFIG_TMP "")
                 get_linter_filter_array(
                     CPPLINT_CFG_JSON_CONTENT
                     ${CPPLINT_CONFIG_JSON_CONTENT}
@@ -80,10 +73,9 @@ function(parse_cpplint_config)
                     FILTER_LIST
                     UPDATED_CPPLINT_CONFIG_TMP
                 )
-                message(STATUS "DEBUGget_linter_filter_array: ${UPDATED_CPPLINT_CONFIG_TMP}")  
+                list(APPEND UPDATED_CPPLINT_CONFIG "${UPDATED_CPPLINT_CONFIG_TMP}")
             endforeach()
         else()
-            # General case for other configuration options
             string(
                 JSON
                 VALUE
