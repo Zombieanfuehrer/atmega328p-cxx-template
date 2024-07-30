@@ -38,7 +38,7 @@ set_python_virtual_enviroment()
 
 if(${ENABLE_CPPLINT})
     include(CppLinter)
-    add_cpplint_dependancy()
+    add_cpplint_custom_target()
 endif()
 
 if(${ENABLE_CMAKE_FORMAT})

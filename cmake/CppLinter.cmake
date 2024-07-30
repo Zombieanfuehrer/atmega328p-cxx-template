@@ -13,31 +13,31 @@
 
 # List of cpplint configuration options
 set(CPPLINT_CONFIG
-    "verbose"      # Set the verbosity level of the output
-    "output"       # Specify the output format
-    "filter"       # Filters to apply during linting
-    "counting"     # Type of counting output (e.g., detailed)
-    "repository"   # Repository root for source files
-    "root"         # Root directory for linting
-    "linelength"   # Maximum line length
-    "recursive"    # Whether to lint recursively
-    "exclude"      # Files or directories to exclude
-    "extensions"   # File extensions to consider
-    "headers"      # Header file extensions
+    "verbose" # Set the verbosity level of the output
+    "output" # Specify the output format
+    "filter" # Filters to apply during linting
+    "counting" # Type of counting output (e.g., detailed)
+    "repository" # Repository root for source files
+    "root" # Root directory for linting
+    "linelength" # Maximum line length
+    "recursive" # Whether to lint recursively
+    "exclude" # Files or directories to exclude
+    "extensions" # File extensions to consider
+    "headers" # Header file extensions
 )
 
 # List of cpplint filter types
 set(CPPLINT_FILTER_TYPES
-    "build"        # Filters related to build issues
-    "legal"        # Filters related to legal issues (e.g., copyright)
-    "readability"  # Filters related to code readability
-    "runtime"      # Filters related to runtime issues
-    "whitespace"   # Filters related to whitespace formatting
+    "build" # Filters related to build issues
+    "legal" # Filters related to legal issues (e.g., copyright)
+    "readability" # Filters related to code readability
+    "runtime" # Filters related to runtime issues
+    "whitespace" # Filters related to whitespace formatting
 )
 
 #######################################################################################################################
-# @brief Function extracts the contents of the passed array (ARRAY_TYPENAME) from the given JSON stream 
-#        (CPPLINT_CFG_JSON_CONTENT) and appends them to FILTER_LIST. 
+# @brief Function extracts the contents of the passed array (ARRAY_TYPENAME) from the given JSON stream
+#        (CPPLINT_CFG_JSON_CONTENT) and appends them to FILTER_LIST.
 #
 # @param [IN] CPPLINT_CFG_JSON_CONTENT The content of the cpplint configuration JSON.
 # @param [IN] ARRAY_TYPENAME The type of the filter array (e.g., "build", "readability").
@@ -111,7 +111,7 @@ function(parse_cpplint_config)
     foreach(CPP_CONFIGURATION_OPTION IN LISTS CPPLINT_CONFIG)
         # Handle filter arrays specially
         if(CPP_CONFIGURATION_OPTION MATCHES "^filter")
-        list(APPEND UPDATED_CPPLINT_CONFIG "--filter=")
+            list(APPEND UPDATED_CPPLINT_CONFIG "--filter=")
             foreach(CPP_LINTER_FILTER_ARRAY IN LISTS CPPLINT_FILTER_TYPES)
                 set(UPDATED_CPPLINT_CONFIG_TMP "")
                 get_linter_filter_array(
@@ -142,8 +142,8 @@ function(parse_cpplint_config)
         endif()
     endforeach()
     set(${PARSE_CPPLINT_CONFIG_CPPLINT_SET_FILTER_OPTIONS}
-    "${UPDATED_CPPLINT_CONFIG}"
-    PARENT_SCOPE)
+        "${UPDATED_CPPLINT_CONFIG}"
+        PARENT_SCOPE)
 endfunction(parse_cpplint_config)
 
 #######################################################################################################################
@@ -154,10 +154,10 @@ endfunction(parse_cpplint_config)
 # @param [IN / OUT] FILTER_LIST The list to store the set options.
 #
 #######################################################################################################################
-function(add_cpplint_dependancy)
+function(add_cpplint_custom_target)
     find_program(CPPLINT "cpplint")
     if(NOT CPPLINT)
-        message(FATAL_ERROR "[add_cpplint_dependancy] cpplint not found! Please install to use this option")
+        message(FATAL_ERROR "[add_cpplint_custom_target] cpplint not found! Please install to use this option")
     else()
         set(CMAKE_CXX_CPPLINT ${CPPLINT})
     endif()
@@ -166,16 +166,14 @@ function(add_cpplint_dependancy)
 
     set(USED_CPPLINT_OPTIONS)
     parse_cpplint_config(
-        CPPLINT_CONFIG_JSON_PATH 
+        CPPLINT_CONFIG_JSON_PATH
         ${CPPLINT_CONFIG_JSON}
         CPPLINT_SET_FILTER_OPTIONS
-        USED_CPPLINT_OPTIONS
-        )
-    # prepare the list for cpplint cli
-    string(REPLACE ";" "," USED_CPPLINT_OPTIONS_STR "${USED_CPPLINT_OPTIONS}")
-    string(REGEX REPLACE ",--" " --" USED_CPPLINT_OPTIONS_STR "${USED_CPPLINT_OPTIONS_STR}")
-    string(REGEX REPLACE "=," "=" USED_CPPLINT_OPTIONS_STR "${USED_CPPLINT_OPTIONS_STR}")
-    message(STATUS "DEBUG: ${USED_CPPLINT_OPTIONS_STR}")
+        USED_CPPLINT_OPTIONS)
+
+    # Prepare the list for cpplint cli
+    string(REPLACE ";" " " USED_CPPLINT_OPTIONS_STR "${USED_CPPLINT_OPTIONS}")
+    string(REGEX REPLACE " " ";" USED_CPPLINT_OPTIONS_STR "${USED_CPPLINT_OPTIONS_STR}")
 
     file(
         GLOB_RECURSE
@@ -190,15 +188,20 @@ function(add_cpplint_dependancy)
         REGEX
         "${CMAKE_SOURCE_DIR}/(build|external|.venv|CMakeFiles)/.*")
 
-    message(STATUS "[add_cpplint_dependancy] add c++ files to cpplint analysis")
+    message(STATUS "[add_cpplint_custom_target] add c++ files to cpplint analysis")
     foreach(CXX_FILE_CPPLINT_CMD ${CXX_FILES})
-        message(STATUS "[add_cpplint_dependancy] add '${CXX_FILE_CPPLINT_CMD}' to cpplint static code analyse")
+        message(STATUS "[add_cpplint_custom_target] add '${CXX_FILE_CPPLINT_CMD}' to cpplint static code analyse")
     endforeach()
+    
+    set(CPPLINT_CLI_CMD ${USED_CPPLINT_OPTIONS_STR})
+    list(APPEND CPPLINT_CLI_CMD ${CXX_FILES})
+
+    message(STATUS "[add_cpplint_custom_target] cpplint set up with following options: ${CPPLINT_CLI_CMD}")
     add_custom_target(
         run_cpplint ALL
-        COMMAND ${CPPLINT} ${USED_CPPLINT_OPTIONS_STR} ${CXX_FILES}
+        COMMAND ${CPPLINT} ${CPPLINT_CLI_CMD}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "run cpplint on cpp source install_files"
         VERBATIM)
+endfunction(add_cpplint_custom_target)
 
-endfunction(add_cpplint_dependancy)
