@@ -147,14 +147,13 @@ function(parse_cpplint_config)
 endfunction(parse_cpplint_config)
 
 #######################################################################################################################
-# @brief Function reads the passed cpplint_config.json (CPPLINT_CONFIG_JSON_PATH) and writes the options found
-#        into the passed list (CPPLINT_SET_FILTER_OPTIONS).
-#
-# @param [IN] CPPLINT_CONFIG_JSON_PATH The path to the cpplint configuration JSON file.
-# @param [IN / OUT] FILTER_LIST The list to store the set options.
+# @brief Function to add a custom target for running cpplint analysis, to do this, the style/cpplint_config.json 
+#        is evaluated and the corresponding options are transferred to cpplint. 
+#        addition, all relevant C++ files are searched for and passed to cpplint for checking.
 #
 #######################################################################################################################
 function(add_cpplint_custom_target)
+    # Find the cpplint executable
     find_program(CPPLINT "cpplint")
     if(NOT CPPLINT)
         message(FATAL_ERROR "[add_cpplint_custom_target] cpplint not found! Please install to use this option")
@@ -162,8 +161,10 @@ function(add_cpplint_custom_target)
         set(CMAKE_CXX_CPPLINT ${CPPLINT})
     endif()
 
+    # Set the path to the cpplint configuration file
     set(CPPLINT_CONFIG_JSON "${PROJECT_SOURCE_DIR}/style/cpplint_config.json")
 
+    # Parse the cpplint configuration file and get the filter options
     set(USED_CPPLINT_OPTIONS)
     parse_cpplint_config(
         CPPLINT_CONFIG_JSON_PATH
@@ -171,16 +172,19 @@ function(add_cpplint_custom_target)
         CPPLINT_SET_FILTER_OPTIONS
         USED_CPPLINT_OPTIONS)
 
-    # Prepare the list for cpplint cli
+    # Prepare the list of cpplint options for the command line
     string(REPLACE ";" " " USED_CPPLINT_OPTIONS_STR "${USED_CPPLINT_OPTIONS}")
     string(REGEX REPLACE " " ";" USED_CPPLINT_OPTIONS_STR "${USED_CPPLINT_OPTIONS_STR}")
 
+    # Get the list of C++ files in the source directory
     file(
         GLOB_RECURSE
         CXX_FILES
         "${CMAKE_SOURCE_DIR}/*.cpp"
         "${CMAKE_SOURCE_DIR}/*.cc"
         "${CMAKE_SOURCE_DIR}/*.cxx")
+
+    # Exclude certain files from the list
     list(
         FILTER
         CXX_FILES
@@ -188,14 +192,17 @@ function(add_cpplint_custom_target)
         REGEX
         "${CMAKE_SOURCE_DIR}/(build|external|.venv|CMakeFiles)/.*")
 
+    # Print the list of files being analyzed by cpplint
     message(STATUS "[add_cpplint_custom_target] add c++ files to cpplint analysis")
     foreach(CXX_FILE_CPPLINT_CMD ${CXX_FILES})
         message(STATUS "[add_cpplint_custom_target] add '${CXX_FILE_CPPLINT_CMD}' to cpplint static code analyse")
     endforeach()
-    
+
+    # Prepare the cpplint command line
     set(CPPLINT_CLI_CMD ${USED_CPPLINT_OPTIONS_STR})
     list(APPEND CPPLINT_CLI_CMD ${CXX_FILES})
 
+    # Set up the custom target for running cpplint
     message(STATUS "[add_cpplint_custom_target] cpplint set up with following options: ${CPPLINT_CLI_CMD}")
     add_custom_target(
         run_cpplint ALL
