@@ -53,10 +53,6 @@ function(get_linter_filter_array)
         ""
         ${ARGN})
 
-    message(
-        STATUS
-            "[get_linter_filter_array] search for cpplint filter type: ${GET_LINTER_FILTER_ARRAY_ARRAY_TYPENAME} and extract appropriate options: \n"
-    )
     string(
         JSON
         VALUE
@@ -147,8 +143,8 @@ function(parse_cpplint_config)
 endfunction(parse_cpplint_config)
 
 #######################################################################################################################
-# @brief Function to add a custom target for running cpplint analysis, to do this, the style/cpplint_config.json 
-#        is evaluated and the corresponding options are transferred to cpplint. 
+# @brief Function to add a custom target for running cpplint analysis, to do this, the style/cpplint_config.json
+#        is evaluated and the corresponding options are transferred to cpplint.
 #        addition, all relevant C++ files are searched for and passed to cpplint for checking.
 #
 #######################################################################################################################
@@ -173,8 +169,17 @@ function(add_cpplint_custom_target)
         USED_CPPLINT_OPTIONS)
 
     # Prepare the list of cpplint options for the command line
-    string(REPLACE ";" " " USED_CPPLINT_OPTIONS_STR "${USED_CPPLINT_OPTIONS}")
-    string(REGEX REPLACE " " ";" USED_CPPLINT_OPTIONS_STR "${USED_CPPLINT_OPTIONS_STR}")
+    string(
+        REPLACE ";"
+                " "
+                USED_CPPLINT_OPTIONS_STR
+                "${USED_CPPLINT_OPTIONS}")
+    string(
+        REGEX
+        REPLACE " "
+                ";"
+                USED_CPPLINT_OPTIONS_STR
+                "${USED_CPPLINT_OPTIONS_STR}")
 
     # Get the list of C++ files in the source directory
     file(
@@ -211,4 +216,3 @@ function(add_cpplint_custom_target)
         COMMENT "run cpplint on cpp source install_files"
         VERBATIM)
 endfunction(add_cpplint_custom_target)
-

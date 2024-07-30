@@ -15,7 +15,7 @@
 # @brief Function to set up a Python virtual environment for the project.
 #        This function checks if Python 3 is installed and if the project has a requirements.txt file.
 #        If the requirements.txt file exists and the .venv directory does not exist, it sets up a virtual environment
-#        using the venv module. If both the requirements.txt file and the .venv directory exist, it activates the 
+#        using the venv module. If both the requirements.txt file and the .venv directory exist, it activates the
 #        virtual environment and installs the required packages.
 #        The Python interpreter is changed to use the virtual environment.
 #        Finally, it installs the packages specified in the requirements.txt file using pip.

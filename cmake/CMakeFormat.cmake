@@ -39,7 +39,7 @@ function(add_cmake_format_target)
                 COMMAND
                 cmake-format
                 -c
-                ${CMAKE_SOURCE_DIR}/.cmake-format.yaml
+                ${CMAKE_SOURCE_DIR}/style/.cmake-format.yaml
                 -i
                 ${cmake_file})
         endforeach()
