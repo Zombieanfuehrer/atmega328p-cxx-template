@@ -20,8 +20,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # OPTIONS
 option(ENABLE_WARNINGS "Enable to add warnings to a target." ON)
 option(ENABLE_WARNINGS_AS_ERRORS "Enable to treat warnings as errors." OFF)
-option(ENABLE_CPPLINT "Enable to add cpplint, static code analysis" ON)
-option(ENABLE_CMAKE_FORMAT "Enable to add cmake-format." ON)
+option(ENABLE_CPPLINT "Enable to add cpplint, static code analysis target" ON)
+option(ENABLE_CMAKE_FORMAT "Enable to add cmake-format target." ON)
+option(ENABLE_DOXYGEN_DOCU "Enable to add doxygen docu target." ON)
 
 # PROJECT / LIBRARY NAMES
 set(LIBRARY_NAME "ATmega328__T_LIB")
@@ -44,6 +45,10 @@ endif()
 if(${ENABLE_CMAKE_FORMAT})
     include(CMakeFormat)
     add_cmake_format_target()
+endif()
+
+if(${ENABLE_DOXYGEN_DOCU})
+    include(DoxygenDocu)
 endif()
 
 include(ConanInstall)
