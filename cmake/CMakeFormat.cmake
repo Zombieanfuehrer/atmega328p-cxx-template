@@ -1,10 +1,22 @@
+# -*- mode: cmake -*-
+#######################################################################################################################
+# @file CMakeFormat.cmake
+#
+# @author David A. Haufe (david.haufe90@gmail.com)
+# @version 1.0.0
+# @date 2024-07-29
+#
+# @brief This function adds a CMake custom Target target which executes CMake format and formats all CMake files automatically.
+#
+# @copyright MIT License
+#######################################################################################################################
 function(add_cmake_format_target)
-    # Definieren der Haupt-CMake-Datei und das Rekursive Suchen nach CMake-Dateien
+    # Define the main CMake file and recursively search for CMake files
     set(ROOT_CMAKE_FILES "${CMAKE_SOURCE_DIR}/CMakeLists.txt")
     file(GLOB_RECURSE CMAKE_FILES_TXT "*/CMakeLists.txt")
     file(GLOB_RECURSE CMAKE_FILES_C "cmake/*.cmake")
 
-    # Filtern der Dateien, um bestimmte Verzeichnisse auszuschließen
+    # Filter the files to exclude certain directories
     list(
         FILTER
         CMAKE_FILES_TXT
@@ -13,12 +25,12 @@ function(add_cmake_format_target)
         "${CMAKE_SOURCE_DIR}/(build|external|.venv)/.*")
     set(CMAKE_FILES ${ROOT_CMAKE_FILES} ${CMAKE_FILES_TXT} ${CMAKE_FILES_C})
 
-    # Suchen des cmake-format Programms
+    # Find the cmake-format program
     find_program(CMAKE_FORMAT cmake-format)
     if(CMAKE_FORMAT)
         message(STATUS "[add_cmake_format_target] Added Cmake Format")
 
-        # Erstellen der Liste von Formatierungsbefehlen
+        # Create the list of formatting commands
         set(FORMATTING_COMMANDS)
         foreach(cmake_file ${CMAKE_FILES})
             list(
@@ -32,7 +44,7 @@ function(add_cmake_format_target)
                 ${cmake_file})
         endforeach()
 
-        # Definieren des custom Targets zum Ausführen der Formatierung
+        # Define the custom target for running the formatting
         add_custom_target(
             run_cmake_format
             COMMAND ${FORMATTING_COMMANDS}
