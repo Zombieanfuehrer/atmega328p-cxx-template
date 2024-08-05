@@ -69,3 +69,8 @@ if(CONAN_GENERATED_CMAKE_PRESET)
 else()
     message(FATAL_ERROR "No valid CMake preset found!")
 endif()
+
+# Include the install commands
+include(Install)
+install_target(${LIBRARY_NAME})
+install_target(${EXECUTABLE_NAME})

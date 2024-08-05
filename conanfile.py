@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-
+from conan.tools.files import copy
 
 class Atmega328TemplateRecipe(ConanFile):
     name = "atmega328_template"
@@ -20,7 +20,7 @@ class Atmega328TemplateRecipe(ConanFile):
     default_options = {"shared": False, "fPIC": False, "platform": "avr"}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt", "*.cmake", "app/*", "src/*", "public/*", "private/*","style/*", "docs/Doxyfile", "configure/*"
+    exports_sources = "CMakeLists.txt", "*.cmake", "app/*", "src/*", "public/*", "private/*", "style/*", "docs/Doxyfile", "configure/*", ".github/workflows/*", "cmake/*", ".gitignore", "LICENSE", "README.md", "requirements.txt", "conanfile.py"
 
     def requirements(self):
         self.build_requires("cmake/[>=3.28.0]")
@@ -35,15 +35,8 @@ class Atmega328TemplateRecipe(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        build_type = str(self.settings.build_type)
-        arch = str(self.settings.arch)
-
-        # build folder name not working
-        build_folder_name = f"build/{build_type}-{arch}"
-        self.output.info(f"Build folder: {build_folder_name}")
-
         cmake.configure()
-        
+
         cmake.build(target="ATmega328__T_LIB")
         cmake.build(target="ATmega328__T_")
 
@@ -51,5 +44,13 @@ class Atmega328TemplateRecipe(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        package_bin_dir = os.path.join(self.package_folder, "bin")
+        os.makedirs(package_bin_dir, exist_ok=True)
+        copy(self, "*", os.path.join(self.build_folder, "bin"), package_bin_dir)
+
     def package_info(self):
-        pass
+        self.cpp_info.libs = ["ATmega328__T_LIB"]
+
+    def configure(self):
+        myvariable = self.conf.get("user.atmega328:profile", default="default_value")
+        self.output.info(f"User-defined configuration variable: {myvariable}")
