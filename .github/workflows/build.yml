@@ -37,18 +37,19 @@ jobs:
         echo "BUILD_TYPE=${{ github.event.inputs.build_type || 'debug' }}" >> $GITHUB_ENV
 
     - name: Build and Test with Docker
-      uses: docker://zombieanfuehrer/avr-gcc-conan-cmake:latest
-      with:
-        entrypoint: /bin/sh
-        args: -c "
-          if [ $BUILD_TYPE == 'release' ]; then
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
+          if [ $BUILD_TYPE = 'release' ]; then
+            conan profile detect &&
             conan install . --build=missing -pr:h=avr-mega328p &&
             source build/Release/generators/conanbuild.sh &&
             cmake --preset conan-avr-release &&
             cmake --build build/Release;
           else
+            conan profile detect &&
             conan install . --build=missing -pr:h=avr-mega328p_g &&
             source build/Debug/generators/conanbuild.sh &&
             cmake --preset conan-avr-debug &&
             cmake --build build/Debug;
-          fi"
+          fi
+        "
