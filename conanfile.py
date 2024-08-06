@@ -23,7 +23,7 @@ class Atmega328TemplateRecipe(ConanFile):
     exports_sources = "CMakeLists.txt", "*.cmake", "app/*", "src/*", "public/*", "private/*", "style/*", "docs/Doxyfile", "configure/*", ".github/workflows/*", "cmake/*", ".gitignore", "LICENSE", "README.md", "requirements.txt", "conanfile.py"
 
     def requirements(self):
-        self.build_requires("cmake/[>=3.28.0]")
+        self.build_requires("cmake/[>=3.20.0]")
 
     def layout(self):
         cmake_layout(self)
