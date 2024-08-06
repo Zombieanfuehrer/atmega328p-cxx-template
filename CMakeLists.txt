@@ -9,7 +9,12 @@ project(
 set(CONAN_PROFILE_NAME
     "avr-mega328p_g"
     CACHE STRING "Name of the conan profile to use")
-set(F_CPU "16000000")
+
+if(NOT DEFINED F_CPU)
+    set(F_CPU "16000000UL")
+endif()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DF_CPU=${F_CPU}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DF_CPU=${F_CPU}")
 
 # GLOBAL VARIABLES
 set(CMAKE_CXX_STANDARD 17)

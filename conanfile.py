@@ -50,7 +50,3 @@ class Atmega328TemplateRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ATmega328__T_LIB"]
-
-    def configure(self):
-        myvariable = self.conf.get("user.atmega328:profile", default="default_value")
-        self.output.info(f"User-defined configuration variable: {myvariable}")
