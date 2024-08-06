@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Set build type
+      id: build_type
+      run: |
+        echo "BUILD_TYPE=${{ github.event.inputs.build_type || 'debug' }}" >> $GITHUB_ENV
+
+    - name: Build and Test with Docker
+      uses: docker://zombieanfuehrer/avr-gcc-conan-cmake:latest
+      with:
+        entrypoint: /bin/sh
+        args: -c "
+          if [ $BUILD_TYPE == 'release' ]; then
+            conan install . --build=missing -pr:h=avr-mega328p &&
+            source build/Release/generators/conanbuild.sh &&
+            cmake --preset conan-avr-release &&
+            cmake --build build/Release;
+          else
+            conan install . --build=missing -pr:h=avr-mega328p_g &&
+            source build/Debug/generators/conanbuild.sh &&
+            cmake --preset conan-avr-debug &&
+            cmake --build build/Debug;
+          fi"
