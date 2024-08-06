@@ -40,13 +40,11 @@ jobs:
       run: |
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
           if [ $BUILD_TYPE = 'release' ]; then
-            conan profile detect &&
             conan install . --build=missing -pr:h=avr-mega328p &&
             source build/Release/generators/conanbuild.sh &&
             cmake --preset conan-avr-release &&
             cmake --build build/Release;
           else
-            conan profile detect &&
             conan install . --build=missing -pr:h=avr-mega328p_g &&
             source build/Debug/generators/conanbuild.sh &&
             cmake --preset conan-avr-debug &&
