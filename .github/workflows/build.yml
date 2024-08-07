@@ -42,12 +42,12 @@ jobs:
         . /opt/venv/bin/activate
           if [ $BUILD_TYPE = 'release' ]; then
             conan install . --build=missing -pr:h=avr-mega328p &&
-            source build/Release/generators/conanbuild.sh &&
+            . build/Release/generators/conanbuild.sh &&
             cmake --preset conan-avr-release &&
             cmake --build build/Release;
           else
             conan install . --build=missing -pr:h=avr-mega328p_g &&
-            source build/Debug/generators/conanbuild.sh &&
+            . build/Debug/generators/conanbuild.sh &&
             cmake --preset conan-avr-debug &&
             cmake --build build/Debug;
           fi
