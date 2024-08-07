@@ -43,22 +43,12 @@ jobs:
           if [ $BUILD_TYPE = 'release' ]; then
             conan install . --build=missing -pr:h=avr-mega328p &&
             . build/Release/generators/conanbuild.sh &&
-            cmake --preset conan-avr-release &&
+            cmake --preset conan-generated-avr-release &&
             cmake --build build/Release;
           else
             conan install . --build=missing -pr:h=avr-mega328p_g &&
             . build/Debug/generators/conanbuild.sh &&
-            cmake --preset conan-avr-debug &&
+            cmake --preset conan-generated-avr-debug &&
             cmake --build build/Debug;
           fi
         "
-
-        - name: Debug Presets
-        if: failure()
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
-            echo 'Content of CMakePresets.json:'
-            cat /workspace/build/Debug/generators/CMakePresets.json || echo 'CMakePresets.json not found'
-            echo 'Content of CMakeUserPresets.json:'
-            cat /workspace/CMakeUserPresets.json || echo 'CMakeUserPresets.json not found'
-          "
