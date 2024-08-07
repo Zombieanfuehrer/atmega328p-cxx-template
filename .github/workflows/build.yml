@@ -52,3 +52,12 @@ jobs:
             cmake --build build/Debug;
           fi
         "
+        
+    - name: Debug Presets
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
+          echo 'Content of CMakePresets.json:'
+          cat /workspace/build/Debug/generators/CMakePresets.json
+          echo 'Content of CMakeUserPresets.json:'
+          cat /workspace/CMakeUserPresets.json
+        "
