@@ -39,7 +39,7 @@ jobs:
     - name: Build on Docker (zombieanfuehrer/avr-gcc-conan-cmake)
       run: |
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
-        source /opt/venv/bin/activate
+        . /opt/venv/bin/activate
           if [ $BUILD_TYPE = 'release' ]; then
             conan install . --build=missing -pr:h=avr-mega328p &&
             source build/Release/generators/conanbuild.sh &&
