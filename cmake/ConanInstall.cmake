@@ -35,7 +35,7 @@ function(run_conan_install)
     # Run the conan install command
     execute_process(
         COMMAND conan install ${RUN_CONAN_INSTALL_CONANFILE_PY_PATH} --build=missing
-                -pr:h=${RUN_CONAN_INSTALL_CONAN_PROFILE}
+                -pr:h=${RUN_CONAN_INSTALL_CONAN_PROFILE} -pr:b=${RUN_CONAN_INSTALL_CONAN_PROFILE}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE CONAN_INSTALL_STDOUT
         ERROR_VARIABLE CONAN_INSTALL_STDERR
