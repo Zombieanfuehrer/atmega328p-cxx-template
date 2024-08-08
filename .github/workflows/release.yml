@@ -31,16 +31,22 @@ jobs:
       with:
         script: |
           const buildType = context.ref.includes('pre') ? 'debug' : 'release';
-          const response = await github.actions.createWorkflowDispatch({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            workflow_id: 'build.yml',
-            ref: context.ref,
-            inputs: {
-              build_type: buildType
-            }
-          });
-          console.log(response);
+          try {
+            const response = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'build.yml',
+              ref: context.ref,
+              inputs: {
+                build_type: buildType
+              }
+            });
+            console.log(response);
+          } catch (error) {
+            console.error('Error triggering build workflow:', error);
+            console.error('Error details:', error.response.data);
+            throw error;
+          }
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
