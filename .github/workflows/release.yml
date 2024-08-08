@@ -3,8 +3,8 @@ name: Release
 on:
   push:
     tags:
-      - "Ver.[0-9]+.[0-9]+.[0-9]"
-      - "Ver.[0-9]+.[0-9]+.[0-9]pre"
+      - "Ver.[0-9]+.[0-9]+.[0-9]+"
+      - "Ver.[0-9]+.[0-9]+.[0-9]+pre"
 
 jobs:
   release:
@@ -24,6 +24,38 @@ jobs:
         key: ${{ runner.os }}-buildx-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-buildx-
+
+    - name: Trigger Build Workflow
+      uses: actions/github-script@v4
+      with:
+        script: |
+          const buildType = context.ref.includes('pre') ? 'debug' : 'release';
+          const response = await github.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'build.yml',
+            ref: context.ref,
+            inputs: {
+              build_type: buildType
+            }
+          });
+          console.log(response);
+
+    - name: Wait for Build Workflow
+      uses: actions/github-script@v4
+      with:
+        script: |
+          const workflowRuns = await github.actions.listWorkflowRuns({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'build.yml',
+            branch: context.ref,
+            status: 'completed'
+          });
+          const buildRun = workflowRuns.data.workflow_runs.find(run => run.head_branch === context.ref);
+          if (!buildRun || buildRun.conclusion !== 'success') {
+            throw new Error('Build workflow did not complete successfully');
+          }
 
     - name: Build and create Conan package
       id: conan_create
