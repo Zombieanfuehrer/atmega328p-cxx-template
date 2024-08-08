@@ -40,6 +40,8 @@ jobs:
             }
           });
           console.log(response);
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
     - name: Wait for Build Workflow
       uses: actions/github-script@v4
