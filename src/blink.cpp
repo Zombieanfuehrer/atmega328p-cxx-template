@@ -2,6 +2,8 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#include "blink.h"
+
 void blink(void)
 {
     DDRB |= (1 << PINB7);

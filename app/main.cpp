@@ -3,4 +3,5 @@
 
 int main () {
     blink();
+    return 0;
 }
