@@ -32,8 +32,6 @@ class Atmega328TemplateRecipe(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        if self.user.atmega_template.profile_name:
-            cmake.definitions["CONAN_PROFILE_NAME"] = self.conf.get("user.atmega_template:profile_name", default="default")
         cmake.configure()
 
         cmake.build(target="ATmega328__T_LIB")
