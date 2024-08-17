@@ -59,24 +59,23 @@ jobs:
       uses: actions/github-script@v4
       with:
           script: |
-            try {
-              const workflowRuns = await github.actions.listWorkflowRuns({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'build.yml',
-                branch: context.ref,
-                status: 'completed'
-              });
-              const buildRun = workflowRuns.data.workflow_runs.find(run => run.head_branch === context.ref);
-              if (!buildRun) {
-                throw new Error('No build workflow run found for the current branch');
-              }
-              if (buildRun.conclusion !== 'success') {
-                throw new Error(`Build workflow did not complete successfully. Conclusion: ${buildRun.conclusion}`);
-              }
-            } catch (error) {
-              console.error('Error waiting for build workflow:', error);
-              throw error;
+            const workflowRuns = await github.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'build.yml',
+              branch: context.ref,
+              status: 'completed'
+            });
+            console.log(`Found ${workflowRuns.data.total_count} workflow runs`);
+            const buildRun = workflowRuns.data.workflow_runs.find(run => run.head_branch === context.ref);
+            if (!buildRun) {
+              console.log('No build workflow run found for the current branch');
+              throw new Error('No build workflow run found for the current branch');
+            }
+            console.log(`Build workflow run found: ${buildRun.id}, conclusion: ${buildRun.conclusion}`);
+            if (buildRun.conclusion !== 'success') {
+              console.log(`Build workflow did not complete successfully. Conclusion: ${buildRun.conclusion}`);
+              throw new Error(`Build workflow did not complete successfully. Conclusion: ${buildRun.conclusion}`);
             }
 
     - name: Build and create Conan package
