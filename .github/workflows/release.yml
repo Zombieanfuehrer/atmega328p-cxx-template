@@ -58,18 +58,26 @@ jobs:
     - name: Wait for Build Workflow
       uses: actions/github-script@v4
       with:
-        script: |
-          const workflowRuns = await github.actions.listWorkflowRuns({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            workflow_id: 'build.yml',
-            branch: context.ref,
-            status: 'completed'
-          });
-          const buildRun = workflowRuns.data.workflow_runs.find(run => run.head_branch === context.ref);
-          if (!buildRun || buildRun.conclusion !== 'success') {
-            throw new Error('Build workflow did not complete successfully');
-          }
+          script: |
+            try {
+              const workflowRuns = await github.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'build.yml',
+                branch: context.ref,
+                status: 'completed'
+              });
+              const buildRun = workflowRuns.data.workflow_runs.find(run => run.head_branch === context.ref);
+              if (!buildRun) {
+                throw new Error('No build workflow run found for the current branch');
+              }
+              if (buildRun.conclusion !== 'success') {
+                throw new Error(`Build workflow did not complete successfully. Conclusion: ${buildRun.conclusion}`);
+              }
+            } catch (error) {
+              console.error('Error waiting for build workflow:', error);
+              throw error;
+            }
 
     - name: Build and create Conan package
       id: conan_create
