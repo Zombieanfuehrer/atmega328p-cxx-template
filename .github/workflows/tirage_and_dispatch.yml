@@ -1,0 +1,35 @@
+name: triage_and_dispatch
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    
+jobs:
+  dispatch_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Dispatch build workflow and get the run ID
+        id: dispatch_build
+        uses: codex-/return-dispatch@v1
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          ref: ${{ github.ref }}
+          repo: ${{ github.repository }}
+          owner: ${{ github.repository_owner }}
+          workflow: build.yml
+          workflow_inputs: |
+            build_type: debug
+          workflow_timeout_seconds: 120
+
+      - name: Use the output run ID and URL
+        run: |
+            echo ${{steps.dispatch_build.outputs.run_id}}
+            echo ${{steps.dispatch_build.outputs.run_url}}
