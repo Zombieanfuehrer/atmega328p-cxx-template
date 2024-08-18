@@ -1,13 +1,12 @@
-name: triage_and_dispatch
+name: Triage and Dispatch
 
 on: 
   push:
     branches:
-      - main
+      - '**'  # Trigger on push to any branch
   pull_request:
     branches:
-      - main
-  workflow_dispatch:
+      - master  # Trigger on pull request to master
 
 jobs:
   dispatch_build:
@@ -18,17 +17,13 @@ jobs:
 
       - name: Dispatch build workflow and get the run ID
         id: dispatch_build
-        uses: codex-/return-dispatch@v1
+        uses: benc-uk/workflow-dispatch@v1
         with:
-          token: ${{ secrets.TEST }}
-          ref: ${{ github.ref }}
-          repo: ${{ github.repository }}
-          owner: ${{ github.repository_owner }}
           workflow: build.yml
-          workflow_inputs: '{ "build_type": "debug" }'
-          workflow_timeout_seconds: 120
+          token: ${{ secrets.AUTH_GITHUB_API }}
+          ref: ${{ github.ref }}
 
       - name: Use the output run ID and URL
         run: |
-            echo ${{steps.dispatch_build.outputs.run_id}}
-            echo ${{steps.dispatch_build.outputs.run_url}}
+          echo "Run ID: ${{ steps.dispatch_build.outputs.run_id }}"
+          echo "Run URL: ${{ steps.dispatch_build.outputs.run_url }}"
