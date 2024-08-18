@@ -59,7 +59,8 @@ pip install conan
 # Alternatively, install Conan directly
 pip install conan
 ```
-- __Conan profiles__  Background [conan introduction to profiles](https://docs.conan.io/2/reference/config_files/profiles.html "conan 2 profile documentation")
+- __Conan profiles__  Background -> [conan introduction to profiles](https://docs.conan.io/2/reference/config_files/profiles.html "conan 2 profile documentation")
+
 After installing Conan, we need specific Conan profiles for the cross-compilation process via Conan -> CMake -> avr-gcc toolchain to set and pass the environment. To use this Conan feature, we need to create a default profile:
 ```sh
 # Create default Conan profile with default name
@@ -108,6 +109,6 @@ cmake --preset conan-generated-avr-debug
 cmake --build build/Debug
 ```
 
-## Lizenz
+## License
 
 This project is licensed under the MIT License. For more information, see the [LICENSE](LICENSE "MIT") file.

@@ -13,110 +13,47 @@ permissions:
     actions: write
     
 jobs:
-  release:
+  trigger_build_workflow:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: Cache Docker layers
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
-
-    - name: Trigger Build Workflow
-      uses: actions/github-script@v4
-      with:
-        script: |
-          const buildType = context.ref.includes('pre') ? 'debug' : 'release';
-          try {
-            const response = await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'build.yml',
-              ref: context.ref,
-              inputs: {
-                build_type: buildType
-              }
-            });
-            console.log(response);
-          } catch (error) {
-            console.error('Error triggering build workflow:', error);
-            console.error('Error details:', error.response.data);
-            throw error;
-          }
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
-    - name: Wait for Build Workflow
-      uses: actions/github-script@v4
-      with:
+      - name: Trigger build workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
-            const workflowRuns = await github.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'build.yml',
-              branch: context.ref,
-              status: 'completed'
+            const github = require('@actions/github');
+            const response = await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+              owner: github.context.repo.owner,
+              repo: github.context.repo.repo,
+              workflow_file: 'build.yml',
+              ref: 'main'
             });
-            console.log(`Found ${workflowRuns.data.total_count} workflow runs`);
-            const buildRun = workflowRuns.data.workflow_runs.find(run => run.head_branch === context.ref);
-            if (!buildRun) {
-              console.log('No build workflow run found for the current branch');
-              throw new Error('No build workflow run found for the current branch');
+            console.log('triggered build workflow');
+
+  wait_for_build_workflow:
+    needs: trigger_build_workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for build workflow to complete
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const github = require('@actions/github');
+            const { owner, repo } = github.context.repo;
+            let run_id = null;
+            let status = 'in_progress';
+            while (status === 'in_progress') { 
+              await new Promise(resolve => setTimeout(resolve, 5000));
+              const runs = await github.actions.listRepoWorkflowRuns({
+                owner,
+                repo,
+                workflow_id: 'build.yml',
+                status: 'in_progress'
+                per_page: 1,
+              });
+              if (runs.data.total_count === 0) {
+                status = 'completed';
+                 console.log('build workflow completed');
+              }
             }
-            console.log(`Build workflow run found: ${buildRun.id}, conclusion: ${buildRun.conclusion}`);
-            if (buildRun.conclusion !== 'success') {
-              console.log(`Build workflow did not complete successfully. Conclusion: ${buildRun.conclusion}`);
-              throw new Error(`Build workflow did not complete successfully. Conclusion: ${buildRun.conclusion}`);
-            }
-
-    - name: Build and create Conan package
-      id: conan_create
-      run: |
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
-          . /opt/venv/bin/activate
-          if [[ '${GITHUB_REF}' =~ Ver\.[0-9]+\.[0-9]+\.[0-9]+pre ]]; then
-            conan create . -pr:h=avr-mega328p_g
-          else
-            conan create . -pr:h=avr-mega328p
-          fi
-        " | tee conan_output.txt
-
-    - name: Extract package folder path
-      id: extract_path
-      run: |
-        PACKAGE_PATH=$(grep -oP '(?<=Package folder ).*' conan_output.txt)
-        echo "PACKAGE_PATH=$PACKAGE_PATH" >> $GITHUB_ENV
-
-    - name: Archive build artifacts
-      run: |
-        tar -czvf release.tar.gz -C ${{ env.PACKAGE_PATH }} .
-
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release.tar.gz
-        asset_name: release.tar.gz
-        asset_content_type: application/gzip
