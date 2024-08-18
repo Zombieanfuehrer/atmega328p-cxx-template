@@ -7,11 +7,10 @@ on:
       - "Ver.[0-9]+.[0-9]+.[0-9]+pre"
   workflow_dispatch:
 
-
 permissions:
-    contents: write
-    actions: write
-    
+  contents: write
+  actions: write
+
 jobs:
   trigger_build_workflow:
     runs-on: ubuntu-latest
@@ -21,10 +20,11 @@ jobs:
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
+            const { github } = require('@actions/github');
             const response = await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
               owner: github.context.repo.owner,
               repo: github.context.repo.repo,
-              workflow_file: 'build.yml',
+              workflow_id: 'build.yml',
               ref: 'main'
             });
             console.log('triggered build workflow');
@@ -38,6 +38,7 @@ jobs:
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
+            const { github } = require('@actions/github');
             const { owner, repo } = github.context.repo;
             let status = 'in_progress';
             while (status === 'in_progress') { 
