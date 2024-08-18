@@ -20,10 +20,9 @@ jobs:
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
-            const { github } = require('@actions/github');
             const response = await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
-              owner: github.context.repo.owner,
-              repo: github.context.repo.repo,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               workflow_id: 'build.yml',
               ref: 'main'
             });
@@ -38,8 +37,7 @@ jobs:
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
-            const { github } = require('@actions/github');
-            const { owner, repo } = github.context.repo;
+            const { owner, repo } = context.repo;
             let status = 'in_progress';
             while (status === 'in_progress') { 
               await new Promise(resolve => setTimeout(resolve, 5000));
