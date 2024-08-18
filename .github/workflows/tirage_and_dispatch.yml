@@ -20,7 +20,7 @@ jobs:
         id: dispatch_build
         uses: codex-/return-dispatch@v1
         with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.AUTH_GITHUB_API }}
           ref: ${{ github.ref }}
           repo: ${{ github.repository }}
           owner: ${{ github.repository_owner }}
