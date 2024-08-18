@@ -27,3 +27,12 @@ jobs:
         run: |
           echo "Run ID: ${{ steps.dispatch_build.outputs.run_id }}"
           echo "Run URL: ${{ steps.dispatch_build.outputs.run_url }}"
+          echo "::set-output name=run_url::${{ steps.dispatch_build.outputs.run_url }}"
+
+      - name: Create a comment with the build URL
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          token: ${{ secrets.AUTH_GITHUB_API }}
+          repository: ${{ github.repository }}
+          issue-number: ${{ github.event.pull_request.number || github.sha }}
+          body: "Build workflow has been triggered. [View build](${{ steps.dispatch_build.outputs.run_url }})"
