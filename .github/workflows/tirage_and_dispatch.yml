@@ -30,9 +30,10 @@ jobs:
           echo "::set-output name=run_url::${{ steps.dispatch_build.outputs.run_url }}"
 
       - name: Create a comment with the build URL
+        if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v1
         with:
           token: ${{ secrets.AUTH_GITHUB_API }}
           repository: ${{ github.repository }}
-          issue-number: ${{ github.event.pull_request.number || github.sha }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: "Build workflow has been triggered. [View build](${{ steps.dispatch_build.outputs.run_url }})"
