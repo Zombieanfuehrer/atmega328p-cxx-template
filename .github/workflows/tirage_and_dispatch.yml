@@ -3,11 +3,14 @@ name: Triage and Dispatch
 on: 
   push:
     branches:
-      - '**'  # Trigger on push to any branch
+      - '**' 
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-pre'
   pull_request:
     branches:
-      - master  # Trigger on pull request to master
-
+      - master  
+      
 jobs:
   dispatch_build:
     runs-on: ubuntu-latest
@@ -18,6 +21,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set create_release variable
+        id: set_create_release
+        run: |
+          if [[ "${GITHUB_REF}" =~ [0-9]+\.[0-9]+\.[0-9]+-pre ]]; then
+            echo "::set-output name=create_release::debug"
+          elif [[ "${GITHUB_REF}" =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "::set-output name=create_release::release"
+          fi
+
       - name: Dispatch build workflow and get the run ID
         id: dispatch_build
         uses: benc-uk/workflow-dispatch@v1
@@ -25,6 +37,8 @@ jobs:
           workflow: build.yml
           token: ${{ secrets.AUTH_GITHUB_API }}
           ref: ${{ github.ref }}
+        env:
+          CREATE_RELEASE: ${{ steps.set_create_release.outputs.create_release }}
 
       - name: Set outputs
         run: |
