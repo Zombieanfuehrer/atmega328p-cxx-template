@@ -1,0 +1,71 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+jobs:
+  conan-package:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Set build type
+      id: build_type
+      run: |
+        echo "BUILD_TYPE=${{ github.event.inputs.release_type || 'debug' }}" >> $GITHUB_ENV
+    
+    - name: Package on Docker (zombieanfuehrer/avr-gcc-conan-cmake)
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
+        . /opt/venv/bin/activate
+          if [ $BUILD_TYPE = 'release' ]; then
+            conan create . --build=missing -pr:h=avr-mega328p -pr:b=avr-mega328p | tee conan_output.txt
+          else
+            conan create . --build=missing -pr:h=avr-mega328p_g | tee conan_output.txt
+          fi
+        "
+    
+    - name: Extract Package Folder Path
+      id: extract_path
+      run: |
+        PACKAGE_FOLDER=$(grep 'Package folder' conan_output.txt | awk '{print $3}')
+        echo "PACKAGE_FOLDER=$PACKAGE_FOLDER" >> $GITHUB_ENV
+        echo "Package folder path: $PACKAGE_FOLDER"
+
+    - name: Extract Package Name
+      id: extract_package_name
+      run: |
+        PACKAGE_NAME=$(grep 'Full package reference' conan_output.txt | awk -F'[:#]' '{print $2}' | sed 's/\//_/g')
+        echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+        echo "Package name: $PACKAGE_NAME"
+
+    - name: Compress Package Folder
+      run: |
+        tar -czvf package.tar.gz -C $PACKAGE_FOLDER .
+        echo "Package folder compressed to package.tar.gz"
