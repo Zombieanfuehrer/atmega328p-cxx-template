@@ -50,7 +50,13 @@ jobs:
             conan create . --build=missing -pr:h=avr-mega328p_g | tee conan_output.txt
           fi
         "
-    
+    - name: Check if conan_output.txt exists
+      run: |
+        if [ ! -f conan_output.txt ]; then
+          echo "Error: conan_output.txt not found"
+          exit 1
+        fi  
+
     - name: Extract Package Folder Path
       run: |
         PACKAGE_FOLDER=$(grep 'Package folder' conan_output.txt | awk '{print $3}')
