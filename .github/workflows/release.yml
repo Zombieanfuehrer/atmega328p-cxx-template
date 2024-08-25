@@ -70,7 +70,7 @@ jobs:
     
     - name: Extract Package Name
       run: |
-        PACKAGE_NAME=$(grep 'Full package reference' conan_output.txt | awk -F'[:#]' '{print $2}' | sed 's/\//_/g')
+        PACKAGE_NAME=$(grep -oP 'Full package reference \K.*' conan_output.txt | awk -F'[:#]' '{print $2}' | sed 's/\//_/g')
         if [ -z "$PACKAGE_NAME" ]; then
           echo "Error: Package name not found in conan_output.txt"
           exit 1
