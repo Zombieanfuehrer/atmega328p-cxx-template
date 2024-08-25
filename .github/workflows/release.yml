@@ -59,7 +59,7 @@ jobs:
             exit 1
           fi
           echo \"Copy package folder: \$PACKAGE_FOLDER\ to mounted shared volume\"
-          cp -r \$PACKAGE_FOLDER /root/.conan2/p
+          cp -r /root/.conan2/p ${{ github.workspace }}/conan_package
           $PACKAGE_FOLDER=${{ github.workspace }}/conan_package
           echo "PACKAGE_FOLDER=$PACKAGE_FOLDER" >> $GITHUB_ENV
         "
