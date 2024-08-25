@@ -54,6 +54,10 @@ jobs:
             conan create . --build=missing -pr:h=avr-mega328p_g 2>&1 | tee /workspace/conan_output.txt
           fi
         "
+    - name: List contents of mounted directory
+      run: |
+        echo "Listing contents of the mounted directory and its subdirectories:"
+        ls -R ${{ github.workspace }}/conan_packages
 
     - name: Check conan_output
       run: |
@@ -94,11 +98,6 @@ jobs:
 
         echo "PACKAGE_NAME_VERSION=$PACKAGE_NAME_VERSION" >> $GITHUB_ENV
         echo "Package name: $PACKAGE_NAME_VERSION"
-    
-    - name: List contents of mounted directory
-      run: |
-        echo "Listing contents of the mounted directory and its subdirectories:"
-        ls -R ${{ github.workspace }}/conan_packages
 
     - name: Compress Package Folder
       run: |
