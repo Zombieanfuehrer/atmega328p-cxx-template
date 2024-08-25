@@ -40,6 +40,10 @@ jobs:
       run: |
         echo "BUILD_TYPE=${{ github.event.inputs.release_type || 'debug' }}" >> $GITHUB_ENV
 
+    - name: Create Conan packages directory
+      run: |
+        mkdir -p ${{ github.workspace }}/conan_packages
+
     - name: Package on Docker (zombieanfuehrer/avr-gcc-conan-cmake)
       run: |
         docker run --rm -v ${{ github.workspace }}:/workspace -v ${{ github.workspace }}/conan_packages:/root/.conan2/p -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
@@ -68,6 +72,8 @@ jobs:
         fi
         echo "PACKAGE_FOLDER=$PACKAGE_FOLDER" >> $GITHUB_ENV
         echo "Package folder path: $PACKAGE_FOLDER"
+        echo "Listing PACKAGE_FOLDER:"
+        ls -la $PACKAGE_FOLDER
     
     - name: Extract Package Name
       run: |
@@ -88,6 +94,11 @@ jobs:
         echo "PACKAGE_NAME_VERSION=$PACKAGE_NAME_VERSION" >> $GITHUB_ENV
         echo "Package name: $PACKAGE_NAME_VERSION"
     
+    - name: List contents of mounted directory
+      run: |
+        echo "Listing contents of the mounted directory and its subdirectories:"
+        ls -R ${{ github.workspace }}/conan_packages
+
     - name: Compress Package Folder
       run: |
         if [ ! -d "$PACKAGE_FOLDER" ]; then
