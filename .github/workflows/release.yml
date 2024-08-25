@@ -39,10 +39,10 @@ jobs:
       id: build_type
       run: |
         echo "BUILD_TYPE=${{ github.event.inputs.release_type || 'debug' }}" >> $GITHUB_ENV
-    
+
     - name: Package on Docker (zombieanfuehrer/avr-gcc-conan-cmake)
       run: |
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
+        docker run --rm -v ${{ github.workspace }}:/workspace -v ${{ github.workspace }}/conan_packages:/root/.conan2/p -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
         . /opt/venv/bin/activate
           if [ $BUILD_TYPE = 'release' ]; then
             conan create . --build=missing -pr:h=avr-mega328p -pr:b=avr-mega328p 2>&1 | tee /workspace/conan_output.txt
@@ -50,6 +50,7 @@ jobs:
             conan create . --build=missing -pr:h=avr-mega328p_g 2>&1 | tee /workspace/conan_output.txt
           fi
         "
+
     - name: Check conan_output
       run: |
         echo "Checking if conan_output.txt exists and has content..."
