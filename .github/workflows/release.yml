@@ -57,7 +57,7 @@ jobs:
     - name: List contents of mounted directory
       run: |
         echo "Listing contents of the mounted directory and its subdirectories:"
-        ll ${{ github.workspace }}/conan_packages
+        ls -l ${{ github.workspace }}/conan_packages
 
     - name: Check conan_output
       run: |
