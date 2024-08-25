@@ -100,11 +100,11 @@ jobs:
 
     - name: Compress Package Folder
       run: |
-        if [ ! -d "$PACKAGE_FOLDER" ]; then
-          echo "Error: Package folder $PACKAGE_FOLDER does not exist"
+        if [ ! -d "$RUNNER_PACKAGE_FOLDER" ]; then
+          echo "Error: Package folder $RUNNER_PACKAGE_FOLDER does not exist"
           exit 1
         fi
-        sudo chmod -R 777 $PACKAGE_FOLDER
+        sudo chmod -R 777 $RUNNER_PACKAGE_FOLDER
         tar -czvf package.tar.gz -C $RUNNER_PACKAGE_FOLDER ./$PACKAGE_NAME_VERSION
         ls -a .
         echo "Package folder compressed to package.tar.gz"
