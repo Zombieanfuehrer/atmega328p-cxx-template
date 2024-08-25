@@ -74,8 +74,12 @@ jobs:
           echo "Error: Package folder not found in conan_output.txt"
           exit 1
         fi
-        echo "Package folder: $PACKAGE_FOLDER"
-        
+        echo "Package folder in Docker Container: $PACKAGE_FOLDER"
+        RELATIVE_PATH=$(echo "$PACKAGE_FOLDER" | sed -n 's|^/root/.conan2/p||p')
+        RUNNER_PACKAGE_FOLDER="${{ github.workspace }}/conan_package$RELATIVE_PATH"
+        echo "RUNNER_PACKAGE_FOLDER=$RUNNER_PACKAGE_FOLDER" >> $GITHUB_ENV
+        echo "Package folder in runner: $RUNNER_PACKAGE_FOLDER"
+
         FULL_REFERENCE=$(grep -oP 'Full package reference: \K.*' conan_output.txt)
         if [ -z "$FULL_REFERENCE" ]; then
           echo "Error: 'Full package reference:' not found in conan_output.txt"
@@ -101,6 +105,6 @@ jobs:
           exit 1
         fi
         sudo chmod -R 777 $PACKAGE_FOLDER
-        tar -czvf package.tar.gz -C $PACKAGE_FOLDER/p/ ./$PACKAGE_NAME_VERSION
+        tar -czvf package.tar.gz -C $RUNNER_PACKAGE_FOLDER ./$PACKAGE_NAME_VERSION
         ls -a .
         echo "Package folder compressed to package.tar.gz"
