@@ -45,9 +45,9 @@ jobs:
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
         . /opt/venv/bin/activate
           if [ $BUILD_TYPE = 'release' ]; then
-            conan create . --build=missing -pr:h=avr-mega328p -pr:b=avr-mega328p > /workspace/conan_output.txt 2>&1
+            conan create . --build=missing -pr:h=avr-mega328p -pr:b=avr-mega328p 2>&1 | tee /workspace/conan_output.txt
           else
-            conan create . --build=missing -pr:h=avr-mega328p_g > /workspace/conan_output.txt 2>&1
+            conan create . --build=missing -pr:h=avr-mega328p_g 2>&1 | tee /workspace/conan_output.txt
           fi
         "
     - name: Check conan_output
