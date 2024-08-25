@@ -40,13 +40,13 @@ jobs:
       run: |
         echo "BUILD_TYPE=${{ github.event.inputs.release_type || 'debug' }}" >> $GITHUB_ENV
 
-    - name: Create Conan packages directory
+    - name: Create shared volume for conan package
       run: |
-        mkdir -p ${{ github.workspace }}/conan_packages
+        mkdir -p ${{ github.workspace }}/conan_package
 
     - name: Package on Docker (zombieanfuehrer/avr-gcc-conan-cmake)
       run: |
-        docker run --rm -v ${{ github.workspace }}:/workspace -v ${{ github.workspace }}/conan_packages:/root/.conan2/p -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
+        docker run --rm -v ${{ github.workspace }}:/workspace -v ${{ github.workspace }}/conan_package:/root/.conan2/p -w /workspace zombieanfuehrer/avr-gcc-conan-cmake:latest /bin/sh -c "
         . /opt/venv/bin/activate
           if [ $BUILD_TYPE = 'release' ]; then
             conan create . --build=missing -pr:h=avr-mega328p -pr:b=avr-mega328p 2>&1 | tee /workspace/conan_output.txt
@@ -58,16 +58,17 @@ jobs:
             echo 'Error: Package folder not found in conan_output.txt'
             exit 1
           fi
-          echo "PACKAGE_FOLDER=$PACKAGE_FOLDER" >> $GITHUB_ENV
           sudo chmod -R 777 \$PACKAGE_FOLDER
           cp -r \$PACKAGE_FOLDER /root/.conan2/p
+          $PACKAGE_FOLDER=${{ github.workspace }}/conan_package
+          echo "PACKAGE_FOLDER=$PACKAGE_FOLDER" >> $GITHUB_ENV
         "
     - name: List contents of mounted directory
       run: |
         echo "Listing contents of the mounted directory and its subdirectories:"
-        ls -l ${{ github.workspace }}/conan_packages
+        ls -l ${{ github.workspace }}/conan_package
         echo "--------------------------------------------------------------------------------"
-        ls -R ${{ github.workspace }}/conan_packages/*
+        ls -R ${{ github.workspace }}/conan_package/*
 
     - name: Check conan_output
       run: |
@@ -76,19 +77,6 @@ jobs:
           echo "Error: conan_output.txt is empty or does not exist";
           exit 1;
         fi
-
-    - name: Extract Package Folder Path
-      run: |
-        PACKAGE_FOLDER=$(grep -oP 'Package folder \K.*' conan_output.txt)
-        if [ -z "$PACKAGE_FOLDER" ]; then
-          echo "Error: Package folder not found in conan_output.txt"
-          exit 1
-        fi
-        echo "PACKAGE_FOLDER=$PACKAGE_FOLDER" >> $GITHUB_ENV
-        echo "Package folder path: $PACKAGE_FOLDER"
-        sudo chmod -R 777 $PACKAGE_FOLDER
-        echo "Listing PACKAGE_FOLDER:"
-        ls -la $PACKAGE_FOLDER
     
     - name: Extract Package Name
       run: |
@@ -116,6 +104,6 @@ jobs:
           exit 1
         fi
         sudo chmod -R 777 $PACKAGE_FOLDER
-        tar -czvf package.tar.gz -C $PACKAGE_FOLDER ./$PACKAGE_NAME_VERSION
+        tar -czvf package.tar.gz -C $PACKAGE_FOLDER/p/ ./$PACKAGE_NAME_VERSION
         ls -a .
         echo "Package folder compressed to package.tar.gz"
