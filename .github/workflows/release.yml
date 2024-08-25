@@ -108,6 +108,7 @@ jobs:
         TARBALL_NAME="$PACKAGE_NAME_VERSION.tar.gz"
         tar -czvf $TARBALL_NAME -C $RUNNER_PACKAGE_FOLDER .
         ls -a .
+        echo "$(pwd)"
         echo "TARBALL_NAME=$TARBALL_NAME" >> $GITHUB_ENV
         echo "TARBALL_PATH=$RUNNER_PACKAGE_FOLDER/$TARBALL_NAME" >> $GITHUB_ENV
     
