@@ -1,4 +1,4 @@
-name: Create release
+name: Create Release
 
 on:
   workflow_dispatch:
@@ -89,5 +89,7 @@ jobs:
     
     - name: Compress Package Folder
       run: |
-        tar -czvf package.tar.gz -C $PACKAGE_FOLDER .
+        sudo chmod -R 777 $PACKAGE_FOLDER
+        tar -czvf package.tar.gz -C $PACKAGE_FOLDER ./$PACKAGE_NAME_VERSION
+        ls -a .
         echo "Package folder compressed to package.tar.gz"
