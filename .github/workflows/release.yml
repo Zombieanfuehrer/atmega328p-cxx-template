@@ -105,6 +105,7 @@ jobs:
           exit 1
         fi
         sudo chmod -R 777 $RUNNER_PACKAGE_FOLDER
-        tar -czvf package.tar.gz -C $RUNNER_PACKAGE_FOLDER ./$PACKAGE_NAME_VERSION
+        TARBALL_NAME="$PACKAGE_NAME_VERSION.tar.gz"
+        tar -czvf $TARBALL_NAME -C $RUNNER_PACKAGE_FOLDER .
         ls -a .
         echo "Package folder compressed to package.tar.gz"
