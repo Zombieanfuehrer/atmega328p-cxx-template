@@ -53,11 +53,21 @@ jobs:
           else
             conan create . --build=missing -pr:h=avr-mega328p_g 2>&1 | tee /workspace/conan_output.txt
           fi
+          PACKAGE_FOLDER=\$(grep -oP 'Package folder \K.*' /workspace/conan_output.txt)
+          if [ -z \"\$PACKAGE_FOLDER\" ]; then
+            echo 'Error: Package folder not found in conan_output.txt'
+            exit 1
+          fi
+          echo "PACKAGE_FOLDER=$PACKAGE_FOLDER" >> $GITHUB_ENV
+          sudo chmod -R 777 \$PACKAGE_FOLDER
+          cp -r \$PACKAGE_FOLDER /root/.conan2/p
         "
     - name: List contents of mounted directory
       run: |
         echo "Listing contents of the mounted directory and its subdirectories:"
         ls -l ${{ github.workspace }}/conan_packages
+        echo "--------------------------------------------------------------------------------"
+        ls -R ${{ github.workspace }}/conan_packages/*
 
     - name: Check conan_output
       run: |
