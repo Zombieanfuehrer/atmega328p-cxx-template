@@ -58,6 +58,7 @@ jobs:
             echo 'Error: Package folder not found in conan_output.txt'
             exit 1
           fi
+          echo \"Package folder: \$PACKAGE_FOLDER\"
           sudo chmod -R 777 \$PACKAGE_FOLDER
           cp -r \$PACKAGE_FOLDER /root/.conan2/p
           $PACKAGE_FOLDER=${{ github.workspace }}/conan_package
