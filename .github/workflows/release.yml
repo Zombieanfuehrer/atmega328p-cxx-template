@@ -65,31 +65,32 @@ jobs:
       run: |
         echo "Checking if conan_output.txt exists and has content..."
         if [ ! -s conan_output.txt ]; then 
-          echo "Error: conan_output.txt is empty or does not exist";
-          exit 1;
-        fi
-
-        PACKAGE_FOLDER=\$(grep -oP 'Package folder \K.*' /workspace/conan_output.txt)
-        if [ -z \"\$PACKAGE_FOLDER\" ]; then
-          echo 'Error: Package folder not found in conan_output.txt'
+          echo "Error: conan_output.txt is empty or does not exist"
           exit 1
         fi
-        echo "Package folder: \$PACKAGE_FOLDER"
-
+        
+        PACKAGE_FOLDER=$(grep -oP 'Package folder \K.*' conan_output.txt)
+        if [ -z "$PACKAGE_FOLDER" ]; then
+          echo "Error: Package folder not found in conan_output.txt"
+          exit 1
+        fi
+        echo "Package folder: $PACKAGE_FOLDER"
+        
         FULL_REFERENCE=$(grep -oP 'Full package reference: \K.*' conan_output.txt)
         if [ -z "$FULL_REFERENCE" ]; then
           echo "Error: 'Full package reference:' not found in conan_output.txt"
           exit 1
         fi
         echo "Full package reference: $FULL_REFERENCE"
+        
         PACKAGE_NAME_VERSION=$(echo "$FULL_REFERENCE" | grep -oP '^[^#]+')
         if [ -z "$PACKAGE_NAME_VERSION" ]; then
           echo "Error: Package name and version not found in full package reference"
           exit 1
         fi
         echo "Package name and version: $PACKAGE_NAME_VERSION"
+        
         PACKAGE_NAME_VERSION=$(echo "$PACKAGE_NAME_VERSION" | sed 's/\//_/g')
-
         echo "PACKAGE_NAME_VERSION=$PACKAGE_NAME_VERSION" >> $GITHUB_ENV
         echo "Package name: $PACKAGE_NAME_VERSION"
 
