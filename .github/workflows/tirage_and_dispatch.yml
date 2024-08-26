@@ -99,6 +99,12 @@ jobs:
           echo "Release concluded with status: $conclusion"
           echo "::set-output name=conclusion::$conclusion"
 
+      - name: Extract tag from ref
+        id: extract_tag
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "::set-output name=tag::$TAG_NAME"
+
       - name: Dispatch release workflow
         uses: benc-uk/workflow-dispatch@v1
         with:

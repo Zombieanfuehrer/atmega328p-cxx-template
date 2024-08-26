@@ -11,6 +11,11 @@ on:
         options:
           - debug
           - release
+      release_version:
+        description: 'Release version'
+        required: true
+        default: '1.0.0'
+        type: string
 
 jobs:
   conan-package:
@@ -117,4 +122,10 @@ jobs:
       with:
         name: ${{ env.TARBALL_NAME }}
         path: ${{ env.TARBALL_PATH }}
+
+    - name: Create GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create ${{ env.RELEASE_VERSION }} ${{ env.TARBALL_PATH }} --title "Release ${{ env.RELEASE_VERSION }}" --notes "Automated release for version ${{ env.RELEASE_VERSION }}"
 
