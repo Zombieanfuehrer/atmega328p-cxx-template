@@ -127,5 +127,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.AUTH_GITHUB_API }}
       run: |
-        gh release create ${{ env.RELEASE_VERSION }} ${{ env.TARBALL_PATH }} --title "Release ${{ env.RELEASE_VERSION }}" --notes "Automated release for version ${{ env.RELEASE_VERSION }}"
-
+        TAG_NAME="${{ github.event.inputs.release_version }}"
+        gh release create $TAG_NAME ${{ env.TARBALL_PATH }} --title "Release $TAG_NAME" --notes "Automated release for version $TAG_NAME"
