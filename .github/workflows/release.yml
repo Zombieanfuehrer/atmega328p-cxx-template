@@ -107,10 +107,10 @@ jobs:
         sudo chmod -R 777 $RUNNER_PACKAGE_FOLDER
         TARBALL_NAME="$PACKAGE_NAME_VERSION.tar.gz"
         tar -czvf $TARBALL_NAME -C $RUNNER_PACKAGE_FOLDER .
-        ls -a .
-        echo "$(pwd)"
+        TARBALL_PATH="$(pwd)/$TARBALL_NAME"
         echo "TARBALL_NAME=$TARBALL_NAME" >> $GITHUB_ENV
-        echo "TARBALL_PATH=$RUNNER_PACKAGE_FOLDER/$TARBALL_NAME" >> $GITHUB_ENV
+        echo "TARBALL_PATH=$TARBALL_PATH" >> $GITHUB_ENV
+        echo "Tarball created: $TARBALL_PATH"
     
     - name: Upload Tarball as Artifact
       uses: actions/upload-artifact@v2
