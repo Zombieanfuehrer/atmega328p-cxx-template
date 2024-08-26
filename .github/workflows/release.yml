@@ -125,7 +125,7 @@ jobs:
 
     - name: Create GitHub Release
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.AUTH_GITHUB_API }}
       run: |
         gh release create ${{ env.RELEASE_VERSION }} ${{ env.TARBALL_PATH }} --title "Release ${{ env.RELEASE_VERSION }}" --notes "Automated release for version ${{ env.RELEASE_VERSION }}"
 
