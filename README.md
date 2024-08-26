@@ -14,6 +14,17 @@ It implements DevOps fundamentals and supports easy integration of libraries int
 CMake is used as the build tool, which supports easy build configuration via Conan in the form of CMake presets.
 This project aims to provide a basic foundation for both beginner and advanced programmers to engage in modern software development in C/C++.
 
+## Using this Template
+
+To create a new project based on this template, follow these steps:
+
+1. Go to the [repository page](https://github.com/Zombieanfuehrer/atmega328p-cxx-template).
+2. Click on the "Use this template" button.
+3. Enter the name and description for your new repository.
+4. Click "Create repository from template".
+
+Your new project will be created with the same files and structure as this template repository.
+
 ## Prerequisites
 
 To use this template, the following prerequisites must be met:
